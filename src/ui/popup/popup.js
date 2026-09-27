@@ -46,11 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
     disableBtn.classList.toggle('disabled', !enabled);
 
     // Update tooltip
-    disableBtn.title = enabled ? 'Disable Extension' : 'Enable Extension';
+    disableBtn.title = enabled ? '停用扩展' : '启用扩展';
   }
 
   function settingsSavedReloadMessage(enabled) {
-    setStatusMessage(`${enabled ? 'Enabled' : 'Disabled'}. Reload page.`);
+    setStatusMessage(`${enabled ? '已启用' : '已停用'}。请刷新页面。`);
   }
 
   function setStatusMessage(str) {

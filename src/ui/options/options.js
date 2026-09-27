@@ -88,33 +88,33 @@ function syncCSSScroll() {
 
 // Action labels — shared by predefined and custom shortcut rows
 const ACTION_OPTIONS = [
-  ['slower', 'Decrease speed'],
-  ['faster', 'Increase speed'],
-  ['rewind', 'Rewind'],
-  ['advance', 'Advance'],
-  ['reset', 'Reset speed'],
-  ['fast', 'Preferred speed'],
-  ['muted', 'Mute'],
-  ['softer', 'Decrease volume'],
-  ['louder', 'Increase volume'],
-  ['pause', 'Pause'],
-  ['mark', 'Set marker'],
-  ['jump', 'Jump to marker'],
-  ['display', 'Show/hide controller'],
+  ['slower', '降低速度'],
+  ['faster', '提高速度'],
+  ['rewind', '后退'],
+  ['advance', '前进'],
+  ['reset', '重置速度'],
+  ['fast', '首选速度'],
+  ['muted', '静音'],
+  ['softer', '降低音量'],
+  ['louder', '提高音量'],
+  ['pause', '暂停'],
+  ['mark', '设置标记'],
+  ['jump', '跳转到标记'],
+  ['display', '显示/隐藏控制器'],
 ];
 
 // Column spec for shortcut rows (used by createRow)
 const SHORTCUT_COLUMNS = [
   { key: 'action', type: 'select', className: 'customDo', options: ACTION_OPTIONS },
-  { key: 'keyInput', type: 'text', className: 'customKey', placeholder: 'press a key' },
-  { key: 'value', type: 'text', className: 'customValue', placeholder: 'value (0.10)' },
+  { key: 'keyInput', type: 'text', className: 'customKey', placeholder: '按下按键' },
+  { key: 'value', type: 'text', className: 'customValue', placeholder: '数值 (0.10)' },
 ];
 
 // Column spec for site rule rows
 const SITE_RULE_COLUMNS = [
-  { key: 'pattern', type: 'text', className: 'rulePattern', placeholder: 'youtube.com or /regex/' },
+  { key: 'pattern', type: 'text', className: 'rulePattern', placeholder: 'youtube.com 或 /正则/' },
   { key: 'disabled', type: 'checkbox', className: 'ruleDisabled', default: false },
-  { key: 'speed', type: 'text', className: 'ruleSpeed', placeholder: '(global)' },
+  { key: 'speed', type: 'text', className: 'ruleSpeed', placeholder: '（全局）' },
 ];
 
 /**
@@ -202,7 +202,7 @@ function validateControllerCSS(css) {
     if (count === 0) {
       textarea.classList.add('css-warn');
       msg.classList.add('warn');
-      msg.textContent = 'No CSS rules parsed — check for syntax errors.';
+      msg.textContent = '未解析出任何 CSS 规则 — 请检查语法错误。';
       return true;
     }
 
@@ -211,9 +211,7 @@ function validateControllerCSS(css) {
     if (dropped.length > 0) {
       textarea.classList.add('css-warn');
       msg.classList.add('warn');
-      msg.textContent = `${count} rule${
-        count !== 1 ? 's' : ''
-      } parsed, ${dropped.length} dropped: ${dropped
+      msg.textContent = `已解析 ${count} 条规则，丢弃 ${dropped.length} 条：${dropped
         .map((r) => `"${r.slice(0, 40)}${r.length > 40 ? '...' : ''}"`)
         .join(', ')}`;
       return true;
@@ -223,7 +221,7 @@ function validateControllerCSS(css) {
   } catch (e) {
     textarea.classList.add('css-error');
     msg.classList.add('error');
-    msg.textContent = `Syntax error: ${e.message.replace(/^Failed to execute.*: /, '')}`;
+    msg.textContent = `语法错误：${e.message.replace(/^Failed to execute.*: /, '')}`;
     return false;
   }
 }
@@ -231,9 +229,9 @@ function validateControllerCSS(css) {
 // TODO(v3): Remove keyCodeAliases once all bindings have displayKey field
 // and the legacy `key` integer field is dropped from the schema.
 const keyCodeAliases = {
-  0: 'null',
-  null: 'null',
-  undefined: 'null',
+  0: '无',
+  null: '无',
+  undefined: '无',
   32: 'Space',
   37: 'Left',
   38: 'Up',
@@ -315,7 +313,7 @@ let layoutMap = null;
  */
 function formatShortcutDisplay(displayKey, modifiers) {
   if (!displayKey) {
-    return 'null';
+    return '无';
   }
   const parts = [];
   if (modifiers) {
@@ -340,7 +338,7 @@ function formatShortcutDisplay(displayKey, modifiers) {
 
 /**
  * Resolve the best display label for a binding.
- * Fallback chain: layoutMap → displayKey → keyCodeAliases → code → "null"
+ * Fallback chain: layoutMap → displayKey → keyCodeAliases → code → "无"
  */
 function resolveDisplayLabel(binding) {
   // Try layout map first (most accurate for current keyboard)
@@ -398,7 +396,7 @@ function recordKeyPress(e) {
     e.stopPropagation();
     return;
   } else if (e.code === 'Escape') {
-    e.target.value = 'null';
+    e.target.value = '无';
     e.target.code = null;
     e.target.keyCode = null;
     e.target.displayKey = null;
@@ -448,12 +446,9 @@ function recordKeyPress(e) {
   // Show contextual warnings for problematic modifier combos
   clearWarning(e.target);
   if (e.ctrlKey && e.altKey) {
-    showWarning(
-      e.target,
-      'This combination may conflict with AltGr input on some keyboard layouts.'
-    );
+    showWarning(e.target, '在某些键盘布局下，此组合键可能与 AltGr 输入冲突。');
   } else if (e.metaKey) {
-    showWarning(e.target, 'Some Cmd/Meta combinations are intercepted by the OS and may not work.');
+    showWarning(e.target, '某些 Cmd/Meta 组合键会被操作系统拦截，可能无法生效。');
   }
 
   e.preventDefault();
@@ -496,7 +491,7 @@ function inputBlur(e) {
       e.target.modifiers
     );
   } else if (e.target.code === null) {
-    e.target.value = 'null';
+    e.target.value = '无';
   } else {
     // Legacy fallback
     const kc = e.target.keyCode;
@@ -673,7 +668,7 @@ function validate() {
         }
         new RegExp(regex, flags);
       } catch {
-        status.textContent = `Error: Invalid site rule regex: "${rule.pattern}". Unable to save.`;
+        status.textContent = `错误：无效的站点规则正则："${rule.pattern}"。无法保存。`;
         status.classList.add('show', 'error');
         valid = false;
         window.validationTimeout = setTimeout(() => {
@@ -690,9 +685,9 @@ function validate() {
         rule.speed < window.VSC.Constants.SPEED_LIMITS.MIN ||
         rule.speed > window.VSC.Constants.SPEED_LIMITS.MAX
       ) {
-        status.textContent = `Error: Speed for "${rule.pattern}" must be between ${
+        status.textContent = `错误："${rule.pattern}" 的速度必须介于 ${
           window.VSC.Constants.SPEED_LIMITS.MIN
-        } and ${window.VSC.Constants.SPEED_LIMITS.MAX}.`;
+        } 和 ${window.VSC.Constants.SPEED_LIMITS.MAX} 之间。`;
         status.classList.add('show', 'error');
         valid = false;
         window.validationTimeout = setTimeout(() => {
@@ -702,6 +697,19 @@ function validate() {
         return valid;
       }
     }
+  }
+
+  // Validate auto-hide duration (seconds)
+  const autoHideSeconds = Number(document.getElementById('autoHideSeconds').value);
+  if (!Number.isFinite(autoHideSeconds) || autoHideSeconds <= 0) {
+    status.textContent = '错误：自动隐藏秒数必须是大于 0 的数字。';
+    status.classList.add('show', 'error');
+    valid = false;
+    window.validationTimeout = setTimeout(() => {
+      status.textContent = '';
+      status.classList.remove('show', 'error');
+    }, 5000);
+    return valid;
   }
 
   return valid;
@@ -727,13 +735,14 @@ async function save_options() {
     const startHidden = document.getElementById('startHidden').checked;
     const controllerOpacity = Number(document.getElementById('controllerOpacity').value);
     const controllerButtonSize = Number(document.getElementById('controllerButtonSize').value);
+    const autoHideSeconds = Number(document.getElementById('autoHideSeconds').value);
     const logLevel = parseInt(document.getElementById('logLevel').value);
     const siteRules = collectSiteRules();
     const customCSS = document.getElementById('controllerCSS').value;
 
     // Validate CSS syntax — block save on parse error
     if (!validateControllerCSS(customCSS)) {
-      status.textContent = 'Error: Controller CSS has syntax errors. Fix them before saving.';
+      status.textContent = '错误：控制器 CSS 存在语法错误。请先修复再保存。';
       status.classList.add('show', 'error');
       setTimeout(() => {
         status.textContent = '';
@@ -745,7 +754,9 @@ async function save_options() {
     // Byte-length guard for chrome.storage.sync (8KB per-item limit)
     const cssByteSize = new Blob([customCSS]).size;
     if (cssByteSize > 8192) {
-      status.textContent = `Error: Controller CSS exceeds 8KB storage limit (${Math.round(cssByteSize / 1024)}KB). Reduce CSS size.`;
+      status.textContent = `错误：控制器 CSS 超过 8KB 存储限制（${Math.round(
+        cssByteSize / 1024
+      )}KB）。请减小 CSS 体积。`;
       status.classList.add('show', 'error');
       setTimeout(() => {
         status.textContent = '';
@@ -767,6 +778,7 @@ async function save_options() {
       startHidden: startHidden,
       controllerOpacity: controllerOpacity,
       controllerButtonSize: controllerButtonSize,
+      autoHideSeconds: autoHideSeconds,
       logLevel: logLevel,
       keyBindings: keyBindings,
       siteRules: siteRules,
@@ -777,7 +789,7 @@ async function save_options() {
     const ok = await window.VSC.videoSpeedConfig.save(settingsToSave);
 
     if (!ok) {
-      status.textContent = 'Error: failed to save options to storage';
+      status.textContent = '错误：无法将选项保存到存储';
       status.classList.add('show', 'error');
       setTimeout(() => {
         status.textContent = '';
@@ -786,7 +798,7 @@ async function save_options() {
     }
   } catch (error) {
     console.error('Failed to save options:', error);
-    status.textContent = `Error saving options: ${error.message}`;
+    status.textContent = `保存选项出错：${error.message}`;
     status.classList.add('show', 'error');
     setTimeout(() => {
       status.textContent = '';
@@ -813,6 +825,7 @@ async function restore_options() {
     document.getElementById('startHidden').checked = storage.startHidden;
     document.getElementById('controllerOpacity').value = storage.controllerOpacity;
     document.getElementById('controllerButtonSize').value = storage.controllerButtonSize;
+    document.getElementById('autoHideSeconds').value = storage.autoHideSeconds;
     document.getElementById('logLevel').value = storage.logLevel;
     document.getElementById('controllerCSS').value = storage.customCSS ?? '';
 
@@ -842,7 +855,7 @@ async function restore_options() {
     }
   } catch (error) {
     console.error('Failed to restore options:', error);
-    document.getElementById('status').textContent = `Error loading options: ${error.message}`;
+    document.getElementById('status').textContent = `加载选项出错：${error.message}`;
     document.getElementById('status').classList.add('show', 'error');
     setTimeout(() => {
       document.getElementById('status').textContent = '';
@@ -854,7 +867,7 @@ async function restore_options() {
 async function restore_defaults() {
   try {
     const status = document.getElementById('status');
-    status.textContent = 'Restoring defaults...';
+    status.textContent = '正在恢复默认设置…';
     status.classList.remove('success', 'error');
     status.classList.add('show');
 
@@ -869,13 +882,13 @@ async function restore_defaults() {
     const defaults = { ...window.VSC.Constants.DEFAULT_SETTINGS, schemaVersion: 2 };
     const ok = await window.VSC.videoSpeedConfig.save(defaults);
     if (!ok) {
-      throw new Error('failed to write defaults to storage');
+      throw new Error('无法将默认设置写入存储');
     }
 
     // Reload the options page (clears and re-renders all shortcut rows)
     await restore_options();
 
-    status.textContent = 'Default options restored';
+    status.textContent = '已恢复默认设置';
     status.classList.add('success');
     setTimeout(() => {
       status.textContent = '';
@@ -883,7 +896,7 @@ async function restore_defaults() {
     }, 2000);
   } catch (error) {
     console.error('Failed to restore defaults:', error);
-    status.textContent = `Error restoring defaults: ${error.message}`;
+    status.textContent = `恢复默认设置出错：${error.message}`;
     status.classList.add('show', 'error');
     setTimeout(() => {
       status.textContent = '';
@@ -915,7 +928,7 @@ async function export_settings() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    status.textContent = 'Settings exported';
+    status.textContent = '设置已导出';
     status.classList.remove('error');
     status.classList.add('show', 'success');
     setTimeout(() => {
@@ -924,7 +937,7 @@ async function export_settings() {
     }, 2000);
   } catch (error) {
     console.error('Failed to export settings:', error);
-    status.textContent = `Error exporting settings: ${error.message}`;
+    status.textContent = `导出设置出错：${error.message}`;
     status.classList.add('show', 'error');
     setTimeout(() => {
       status.textContent = '';
@@ -956,11 +969,11 @@ async function handleImportFile(event) {
     try {
       imported = JSON.parse(text);
     } catch (e) {
-      throw new Error('File is not valid JSON', { cause: e });
+      throw new Error('文件不是有效的 JSON', { cause: e });
     }
 
     if (!imported || typeof imported !== 'object' || !Array.isArray(imported.keyBindings)) {
-      throw new Error('File does not look like a Video Speed Controller settings file');
+      throw new Error('文件看起来不是 视频速度控制器 的设置文件');
     }
 
     // Ensure config is initialized
@@ -972,7 +985,7 @@ async function handleImportFile(event) {
     await window.VSC.StorageManager.clear();
     const ok = await window.VSC.videoSpeedConfig.save(imported);
     if (!ok) {
-      throw new Error('Failed to write imported settings to storage');
+      throw new Error('无法将导入的设置写入存储');
     }
 
     // Remove custom shortcut rows before reloading UI
@@ -983,7 +996,7 @@ async function handleImportFile(event) {
     // Reload settings into the UI
     await restore_options();
 
-    status.textContent = 'Settings imported successfully';
+    status.textContent = '设置导入成功';
     status.classList.remove('error');
     status.classList.add('show', 'success');
     setTimeout(() => {
@@ -992,7 +1005,7 @@ async function handleImportFile(event) {
     }, 2000);
   } catch (error) {
     console.error('Failed to import settings:', error);
-    status.textContent = `Import failed: ${error.message}`;
+    status.textContent = `导入失败：${error.message}`;
     status.classList.add('show', 'error');
     setTimeout(() => {
       status.textContent = '';

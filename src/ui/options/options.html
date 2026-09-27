@@ -1,7 +1,8 @@
 <!doctype html>
 <html>
   <head>
-    <title>Video Speed Controller: Options</title>
+    <meta charset="utf-8" />
+    <title>视频速度控制器：设置</title>
     <link rel="stylesheet" href="options.css" />
     <script src="options.js"></script>
   </head>
@@ -10,17 +11,17 @@
     <header>
       <nav class="header-tabs">
         <img src="../../assets/icons/icon48.png" alt="" class="header-icon" />
-        <button id="tab-settings" class="header-tab active">Settings</button>
-        <button id="tab-advanced" class="header-tab">Advanced</button>
-        <button id="tab-faq" class="header-tab">FAQ</button>
+        <button id="tab-settings" class="header-tab active">设置</button>
+        <button id="tab-advanced" class="header-tab">高级</button>
+        <button id="tab-faq" class="header-tab">常见问题</button>
       </nav>
       <div class="split-button">
-        <button id="save" class="split-primary">Save</button>
-        <button id="split-toggle" class="split-arrow" aria-label="More actions">&#9662;</button>
+        <button id="save" class="split-primary">保存</button>
+        <button id="split-toggle" class="split-arrow" aria-label="更多操作">&#9662;</button>
         <div id="split-menu" class="split-dropdown" hidden>
-          <button id="import">Import</button>
-          <button id="export">Export</button>
-          <button id="restore">Reset</button>
+          <button id="import">导入</button>
+          <button id="export">导出</button>
+          <button id="restore">重置</button>
         </div>
         <input type="file" id="importFile" accept=".json" hidden />
       </div>
@@ -29,38 +30,38 @@
     <!-- ============ SETTINGS TAB ============ -->
     <div id="panel-settings">
       <section id="customs">
-        <h3>Shortcuts</h3>
+        <h3>快捷键</h3>
         <div id="shortcuts-container"></div>
-        <button id="add">Add New</button>
+        <button id="add">新增</button>
       </section>
 
       <section>
-        <h3>Preferences</h3>
+        <h3>首选项</h3>
         <div class="row">
           <label for="audioBoolean"
-            >Audio support<br />
-            <em>Show speed controls on audio elements.</em></label
+            >音频支持<br />
+            <em>在音频元素上显示速度控制。</em></label
           >
           <input id="audioBoolean" type="checkbox" />
         </div>
         <div class="row">
           <label for="rememberSpeed"
-            >Remember playback speed<br />
-            <em>Store and auto-apply the last used speed to all new videos.</em></label
+            >记住播放速度<br />
+            <em>存储最后一次使用的速度，并自动应用到所有新视频。</em></label
           >
           <input id="rememberSpeed" type="checkbox" />
         </div>
         <div class="row">
           <label for="startHidden"
-            >Hide controller by default<br />
-            <em>Controller stays hidden until toggled via shortcut.</em></label
+            >默认隐藏控制器<br />
+            <em>控制器保持隐藏，直到通过快捷键切换显示。</em></label
           >
           <input id="startHidden" type="checkbox" />
         </div>
         <div class="row">
           <label for="exclusiveKeys"
-            >Exclusive keyboard shortcuts<br />
-            <em>When possible, prevent websites from also handling VSC shortcut keys.</em></label
+            >独占键盘快捷键<br />
+            <em>在可能的情况下，阻止网站同时处理 VSC 快捷键。</em></label
           >
           <input id="exclusiveKeys" type="checkbox" />
         </div>
@@ -72,59 +73,61 @@
       <section>
         <div class="row">
           <label for="controllerOpacity"
-            >Controller opacity<br />
-            <em>0 = fully transparent, 1 = fully opaque. Default: 0.3</em>
+            >控制器不透明度<br />
+            <em>0 = 完全透明，1 = 完全不透明。默认：0.3</em>
           </label>
           <input id="controllerOpacity" type="text" value="" />
         </div>
         <div class="row">
           <label for="controllerButtonSize"
-            >Controller button size<br />
-            <em>Font size in pixels for the speed display and buttons. Default: 14</em>
+            >控制器按钮大小<br />
+            <em>速度显示和按钮的字号（像素）。默认：14</em>
           </label>
           <input id="controllerButtonSize" type="text" value="" />
         </div>
         <div class="row">
+          <label for="autoHideSeconds"
+            >自动隐藏<br />
+            <em>使用调速、暂停等快捷键后浮窗保持显示的秒数。支持小数。默认：3</em>
+          </label>
+          <input id="autoHideSeconds" type="text" value="" />
+        </div>
+        <div class="row">
           <label for="logLevel"
-            >Console Log Level<br />
-            <em>Set verbosity in the browser console</em></label
+            >控制台日志级别<br />
+            <em>设置浏览器控制台中的详细程度</em></label
           >
           <select id="logLevel">
-            <option value="1">None</option>
-            <option value="2">Error</option>
-            <option value="3">Warning</option>
-            <option value="4">Info</option>
-            <option value="5">Debug</option>
-            <option value="6">Verbose</option>
+            <option value="1">无</option>
+            <option value="2">错误</option>
+            <option value="3">警告</option>
+            <option value="4">信息</option>
+            <option value="5">调试</option>
+            <option value="6">详细</option>
           </select>
         </div>
         <div class="row">
           <label
-            >Site rules<br />
+            >站点规则<br />
             <em
-              >Per-site overrides. Use a domain or
-              <a href="https://www.regexpal.com/">regex</a> (e.g. <code>/\.edu$/i</code>). Check
-              "Disable" to turn off the extension on that site. Set a speed to override the
-              default.</em
+              >按站点进行覆盖。可使用域名或 <a href="https://www.regexpal.com/">正则表达式</a>（例如
+              <code>/\.edu$/i</code>）。勾选 “禁用”可在该站点关闭扩展。设置速度可覆盖默认值。</em
             >
           </label>
           <div id="site-rules-container">
             <div class="site-rules-header">
-              <span>Pattern</span>
-              <span>Disable</span>
-              <span>Speed</span>
+              <span>匹配模式</span>
+              <span>禁用</span>
+              <span>速度</span>
             </div>
           </div>
-          <button id="add-site-rule">Add Site Rule</button>
+          <button id="add-site-rule">添加站点规则</button>
           <div id="siteRulesValidation" class="css-validation"></div>
         </div>
         <div class="row">
           <label for="controllerCSS"
-            >Custom CSS<br />
-            <em
-              >Additional rules injected alongside the built-in defaults. Use to override
-              positioning or add site-specific tweaks.</em
-            >
+            >自定义 CSS<br />
+            <em>在内置默认样式之外注入的额外规则。可用于覆盖定位或添加针对特定站点的调整。</em>
           </label>
           <div class="css-editor">
             <pre id="cssHighlight" class="css-highlight" aria-hidden="true"></pre>
@@ -132,10 +135,10 @@
               id="controllerCSS"
               rows="8"
               spellcheck="false"
-              placeholder="/* Global override */
+              placeholder="/* 全局覆盖 */
 vsc-controller { top: 50px !important; }
 
-/* Domain-specific */
+/* 针对特定域名 */
 :root[style*='--vsc-domain: &quot;example.com&quot;'] vsc-controller {
   display: none !important;
 }"
@@ -155,87 +158,76 @@ vsc-controller { top: 50px !important; }
       <section>
         <div id="faq">
           <ul class="faq-toc">
-            <li><a href="#faq-local">Local files / Incognito</a></li>
-            <li><a href="#faq-disable">Disable on a site</a></li>
-            <li><a href="#faq-site-speed">Default speed per site</a></li>
-            <li><a href="#faq-remember">Remember speed</a></li>
-            <li><a href="#faq-keys">Shortcut conflicts</a></li>
-            <li><a href="#faq-position">Controller positioning</a></li>
-            <li><a href="#faq-missing">Controller not showing</a></li>
-            <li><a href="#faq-spa">Speed resets on navigate</a></li>
-            <li><a href="#faq-audio">Audio support</a></li>
+            <li><a href="#faq-local">本地文件 / 无痕模式</a></li>
+            <li><a href="#faq-disable">在某个站点上禁用</a></li>
+            <li><a href="#faq-site-speed">为站点设置默认速度</a></li>
+            <li><a href="#faq-remember">记住速度</a></li>
+            <li><a href="#faq-keys">快捷键冲突</a></li>
+            <li><a href="#faq-position">控制器定位</a></li>
+            <li><a href="#faq-missing">控制器不显示</a></li>
+            <li><a href="#faq-spa">跳转页面时速度重置</a></li>
+            <li><a href="#faq-audio">音频支持</a></li>
           </ul>
           <hr />
 
-          <h4 id="faq-local">
-            The speed controls are not showing up for local videos or Incognito mode?
-          </h4>
+          <h4 id="faq-local">本地视频或无痕模式下看不到速度控制？</h4>
           <p>
-            To enable playback of local media (e.g. File &gt; Open File) or Incognito mode, you need
-            to manually grant additional permissions to the extension.
+            要为本地媒体（例如「文件 &gt; 打开文件」）或无痕模式启用播放，你需要
+            手动为该扩展授予额外权限。
           </p>
           <ul>
-            <li>In a new tab, navigate to <code>chrome://extensions</code></li>
+            <li>在新标签页中访问 <code>chrome://extensions</code></li>
             <li>
-              Find "Video Speed Controller" extension in the list and enable "Allow access to file
-              URLs" and/or "Allow in Incognito".
+              在列表中找到「视频速度控制器」扩展，并启用「允许访问文件网址」和/或「在无痕模式下启用」。
             </li>
           </ul>
 
-          <h4 id="faq-disable">How do I disable the extension on a specific site?</h4>
+          <h4 id="faq-disable">如何在某个特定站点上禁用该扩展？</h4>
           <p>
-            Go to <strong>Advanced &gt; Site rules</strong> and add a rule with the site's domain
-            (e.g. <code>example.com</code>). Check the <strong>Disable</strong> checkbox. The
-            extension will not inject on that site. You can also use regex patterns like
-            <code>/\.edu$/i</code> to match multiple domains.
+            前往 <strong>高级 &gt; 站点规则</strong>，添加一条包含该站点域名 （例如
+            <code>example.com</code>）的规则，并勾选 <strong>禁用</strong> 复选框。该
+            扩展将不会在该站点注入。你也可以使用类似
+            <code>/\.edu$/i</code> 的正则模式来匹配多个域名。
           </p>
 
-          <h4 id="faq-site-speed">How do I set a default speed for a specific site?</h4>
+          <h4 id="faq-site-speed">如何为某个特定站点设置默认速度？</h4>
           <p>
-            In <strong>Advanced &gt; Site rules</strong>, add a rule with the site's domain and set
-            the <strong>Speed</strong> field to your desired value (e.g. <code>2</code> for 2x).
-            Leave the Disable checkbox unchecked. Every new video on that site will start at that
-            speed.
+            在 <strong>高级 &gt; 站点规则</strong> 中，添加一条包含该站点域名的规则，并把
+            <strong>速度</strong> 字段设置为想要的值（例如 <code>2</code> 表示 2 倍速）。
+            不要勾选「禁用」复选框。该站点上的每个新视频都会以该速度开始播放。
           </p>
 
-          <h4 id="faq-remember">How does "Remember playback speed" interact with site rules?</h4>
+          <h4 id="faq-remember">「记住播放速度」与站点规则如何交互？</h4>
           <p>
-            When <code>rememberSpeed</code> is <strong>off</strong> (default), each page load starts
-            at 1x &mdash; or the site rule speed if one matches. Your in-session speed changes apply
-            to all new videos but are forgotten on page reload.
+            当 <code>rememberSpeed</code> 处于 <strong>关闭</strong> 状态（默认）时，每次
+            页面加载都从 1 倍速开始 &mdash; 如果有匹配的站点规则，则以规则速度开始。你在
+            会话中的速度更改会应用于所有新视频，但页面刷新后会被遗忘。
           </p>
           <p>
-            When <code>rememberSpeed</code> is <strong>on</strong>, the last speed you set is stored
-            and persists across sessions. This stored speed <strong>takes precedence</strong> over
-            site rule defaults. To let a site rule win again, either turn off
-            <code>rememberSpeed</code> or manually reset to 1x.
+            当 <code>rememberSpeed</code> 处于 <strong>开启</strong> 状态时，你最后设置的
+            速度会被存储并跨会话保留。这个已存储的速度 <strong>优先于</strong>
+            站点规则默认值。若要让站点规则重新生效，请关闭
+            <code>rememberSpeed</code>，或手动重置为 1 倍速。
           </p>
 
-          <h4 id="faq-keys">A site's keyboard shortcuts conflict with mine. What can I do?</h4>
-          <p>Three options:</p>
+          <h4 id="faq-keys">某个网站的键盘快捷键和我的冲突了，该怎么办？</h4>
+          <p>三种方案：</p>
           <ul>
             <li>
-              <strong>Add a modifier:</strong> In Settings &gt; Shortcuts, add <code>Shift</code>,
-              <code>Ctrl</code>, or <code>Alt</code> to your shortcut keys to create chord
-              combinations the site won't intercept.
+              <strong>添加修饰键：</strong>在 设置 &gt; 快捷键 中，为你的快捷键添加
+              <code>Shift</code>、<code>Ctrl</code> 或 <code>Alt</code>，创建网站不会 拦截的组合键。
             </li>
+            <li><strong>重新绑定到未使用的按键：</strong>把默认按键改为该网站未使用的按键。</li>
             <li>
-              <strong>Rebind to unused keys:</strong> Change the default key to one the site doesn't
-              use.
-            </li>
-            <li>
-              <strong>Enable exclusive mode:</strong> Turn on
-              <code>Exclusive keyboard shortcuts</code> in Preferences to prevent sites from also
-              handling your VSC shortcut keys.
+              <strong>启用独占模式：</strong>在 首选项 中打开
+              <code>独占键盘快捷键</code>，以阻止网站同时处理你的 VSC 快捷键。
             </li>
           </ul>
 
-          <h4 id="faq-position">
-            The controller overlaps with site controls. How do I reposition it?
-          </h4>
+          <h4 id="faq-position">控制器与网站自身的控件重叠了，如何重新定位？</h4>
           <p>
-            Go to <strong>Advanced &gt; Controller CSS</strong>. Add a domain rule targeting
-            <code>vsc-controller</code> using the <code>--vsc-domain</code> CSS variable. Example:
+            前往 <strong>高级 &gt; 自定义 CSS</strong>。使用 <code>--vsc-domain</code> CSS
+            变量添加一条针对 <code>vsc-controller</code> 的域名规则。例如：
           </p>
           <p>
             <code
@@ -243,46 +235,41 @@ vsc-controller { top: 50px !important; }
               60px; }</code
             >
           </p>
-          <p>
-            You can also drag the controller to a new position on any page. See the existing rules
-            for YouTube, Netflix, etc. as reference.
-          </p>
+          <p>你也可以在任意页面上把控制器拖动到新位置。可以参考现有的 YouTube、Netflix 等规则。</p>
 
-          <h4 id="faq-missing">The controller is not appearing on a site. Why?</h4>
-          <p>Common causes:</p>
+          <h4 id="faq-missing">控制器在某个站点上不出现，为什么？</h4>
+          <p>常见原因：</p>
           <ul>
             <li>
-              The site is in your <strong>Site rules</strong> with Disable checked &mdash; remove or
-              uncheck it.
+              该站点在你的 <strong>站点规则</strong> 中且勾选了「禁用」&mdash;
+              请移除该规则或取消勾选。
             </li>
             <li>
-              The site uses Flash or a non-HTML5 player &mdash; the extension only works with native
-              <code>&lt;video&gt;</code> and <code>&lt;audio&gt;</code> elements.
+              该站点使用 Flash 或非 HTML5 播放器 &mdash; 该扩展只适用于原生
+              <code>&lt;video&gt;</code> 和 <code>&lt;audio&gt;</code> 元素。
             </li>
             <li>
-              <code>Hide controller by default</code> is enabled &mdash; press your display toggle
-              shortcut (default: <code>V</code>) to show it.
+              已启用 <code>默认隐藏控制器</code> &mdash; 按下你的显示切换
+              快捷键（默认：<code>V</code>）即可显示它。
             </li>
           </ul>
 
-          <h4 id="faq-spa">Speed resets when I navigate on YouTube or similar single-page apps?</h4>
+          <h4 id="faq-spa">在 YouTube 等单页应用上跳转页面时速度会重置？</h4>
           <p>
-            YouTube uses SPA navigation &mdash; the page doesn't fully reload, but the player may
-            reinitialize. The extension restores speed from the in-session value automatically. If
-            speed still resets, enable <code>rememberSpeed</code> in Preferences to persist speed
-            across navigations and sessions.
+            YouTube 使用 SPA 导航 &mdash; 页面不会完全重新加载，但播放器可能会
+            重新初始化。扩展会自动从会话内的值恢复速度。如果速度仍然重置，请在 首选项中启用
+            <code>rememberSpeed</code>，以跨导航和会话保留速度。
           </p>
 
-          <h4 id="faq-audio">Does this work with audio elements, not just video?</h4>
+          <h4 id="faq-audio">它只对视频有效，还是也支持音频元素？</h4>
           <p>
-            Yes. When <code>Audio support</code> is enabled in Preferences (on by default), the
-            controller appears on <code>&lt;audio&gt;</code> elements too. All speed controls and
-            keyboard shortcuts work identically for audio.
+            都支持。当在 首选项中启用 <code>音频支持</code>（默认开启）时， 控制器也会出现在
+            <code>&lt;audio&gt;</code> 元素上。所有速度控制和 键盘快捷键对音频同样适用。
           </p>
         </div>
         <div class="row">
-          <button id="about" class="secondary">About Video Speed Controller</button>
-          <button id="feedback" class="secondary">Send Feedback</button>
+          <button id="about" class="secondary">关于 视频速度控制器</button>
+          <button id="feedback" class="secondary">发送反馈</button>
         </div>
       </section>
     </div>
