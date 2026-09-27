@@ -11,9 +11,13 @@
 (*                                                                         *)
 (* Rendering is a precedence relation, not a mutable variable:              *)
 (*                                                                         *)
-(*   external host hide / no source / FORCE_HIDE                            *)
+(*   external host hide / no source                                        *)
 (*     > FORCE_SHOW / flash                                                 *)
+(*     > FORCE_HIDE                                                        *)
 (*     > automatic media hide / site autohide                              *)
+(*                                                                         *)
+(* Transient feedback (a speed or pause shortcut) must stay visible even    *)
+(* under an explicit HIDE or startHidden; only unavailable media is final.  *)
 (*                                                                         *)
 (* Timers use a bounded abstraction. TIMED_ARMED becomes TIMED_DUE, then    *)
 (* expires. Repeated flash requests re-arm it; weak fairness prevents an    *)
@@ -63,13 +67,13 @@ Replace(f, i, value) == [j \in Controllers |-> IF j = i THEN value ELSE f[j]]
 IsAudio(i) == i \in AudioControllers
 
 HardHidden(i) ==
-  ~attached[i] \/ hostHidden[i] \/ noSource[i] \/ overrideMode[i] = Hide
+  ~attached[i] \/ hostHidden[i] \/ noSource[i]
 
 ForcedShown(i) == overrideMode[i] = Show \/ flashMode[i] # NoFlash
 
 Visible(i) ==
   ~HardHidden(i) /\
-  (ForcedShown(i) \/ (~automaticHidden[i] /\ ~siteAutohide[i]))
+  (ForcedShown(i) \/ (overrideMode[i] # Hide /\ ~automaticHidden[i] /\ ~siteAutohide[i]))
 
 ToggleTarget(i) ==
   IF overrideMode[i] = Auto
@@ -78,7 +82,7 @@ ToggleTarget(i) ==
 
 FlashTarget(i) == IF IsAudio(i) THEN Persistent ELSE TimedArmed
 
-FlashAllowed(i) == attached[i] /\ ~startHidden /\ overrideMode[i] # Hide
+FlashAllowed(i) == attached[i]
 
 TypeOK ==
   /\ attached \in [Controllers -> BOOLEAN]
@@ -157,9 +161,9 @@ StopTimerRefresh(i) ==
 
 (***************************************************************************)
 (* Automatic and environment-owned inputs. None may rewrite explicit user  *)
-(* intent or flash state. startHidden blocks future automatic-show and flash *)
-(* events but, matching production, changing it does not retroactively hide *)
-(* an existing controller or cancel an existing flash.                     *)
+(* intent or flash state. startHidden blocks future automatic-show events   *)
+(* but never blocks flash, and, matching production, changing it does not   *)
+(* retroactively hide an existing controller or cancel an existing flash.   *)
 (***************************************************************************)
 AutomaticHide(i) ==
   /\ attached[i]
@@ -270,9 +274,6 @@ FlashMatchesMediaType ==
       THEN flashMode[i] \in {NoFlash, Persistent}
       ELSE flashMode[i] \in {NoFlash, TimedArmed, TimedDue}
 
-HideHasNoFlash ==
-  \A i \in Controllers : overrideMode[i] = Hide => flashMode[i] = NoFlash
-
 AudioHasNoTimerRefresh ==
   \A i \in AudioControllers : ~timerRefreshEnabled[i]
 
@@ -290,11 +291,16 @@ ForceShowDominatesAutomatic ==
     attached[i] /\ ~hostHidden[i] /\ ~noSource[i] /\ overrideMode[i] = Show
       => Visible(i)
 
-FlashDominatesAutomatic ==
+FlashDominatesHide ==
+  \A i \in Controllers :
+    attached[i] /\ ~hostHidden[i] /\ ~noSource[i] /\ flashMode[i] # NoFlash
+      => Visible(i)
+
+HideIsHiddenWithoutFlash ==
   \A i \in Controllers :
     attached[i] /\ ~hostHidden[i] /\ ~noSource[i] /\
-    overrideMode[i] # Hide /\ flashMode[i] # NoFlash
-      => Visible(i)
+    overrideMode[i] = Hide /\ flashMode[i] = NoFlash
+      => ~Visible(i)
 
 AutoLayerIsExact ==
   \A i \in Controllers :

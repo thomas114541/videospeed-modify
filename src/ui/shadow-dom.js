@@ -36,8 +36,19 @@ class ShadowDOMManager {
         opacity: 0 !important;
       }
 
-      /* Explicit show and temporary speed feedback outrank automatic hiding,
-         including startHidden, media visibility, and site autohide. */
+      /* Explicit hide outranks the automatic layer, but NOT temporary feedback:
+         a speed or pause shortcut must stay visible even after V hid the
+         controller. Source order against the .vsc-show rule below is what
+         encodes that. */
+      :host([data-vsc-visibility="hide"]) #controller {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+      }
+
+      /* Explicit show and temporary speed feedback outrank both layers above,
+         including startHidden, explicit hide, media visibility, and site
+         autohide. */
       :host([data-vsc-visibility="show"]) #controller,
       :host(.vsc-show) #controller {
         display: block !important;
@@ -45,9 +56,7 @@ class ShadowDOMManager {
         opacity: ${opacity} !important;
       }
 
-      /* Explicit hide and unavailable media are final: flashes and user show
-         overrides must not reveal them. */
-      :host([data-vsc-visibility="hide"]) #controller,
+      /* Unavailable media is final: no override and no flash may reveal it. */
       :host(.vsc-nosource) #controller {
         display: none !important;
         visibility: hidden !important;

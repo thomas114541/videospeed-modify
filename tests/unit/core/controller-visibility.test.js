@@ -7,19 +7,18 @@ const V = () => window.VSC.ControllerVisibility;
 const BOOLS = [false, true];
 
 function expectedVisible(state) {
-  if (
-    !state.attached ||
-    state.hostHidden ||
-    state.noSource ||
-    state.override === V().OVERRIDES.HIDE
-  ) {
+  if (!state.attached || state.hostHidden || state.noSource) {
     return false;
   }
-  return (
-    state.override === V().OVERRIDES.SHOW ||
-    state.flash !== V().FLASH.NONE ||
-    (!state.automaticHidden && !state.siteAutohide)
-  );
+  // Explicit SHOW and transient feedback outrank every hide layer, including an
+  // explicit HIDE and startHidden. Only unavailable media stays final.
+  if (state.override === V().OVERRIDES.SHOW || state.flash !== V().FLASH.NONE) {
+    return true;
+  }
+  if (state.override === V().OVERRIDES.HIDE) {
+    return false;
+  }
+  return !state.automaticHidden && !state.siteAutohide;
 }
 
 function allValidStates() {
@@ -42,9 +41,6 @@ function allValidStates() {
                       !attached &&
                       (override !== V().OVERRIDES.AUTO || flash !== V().FLASH.NONE)
                     ) {
-                      continue;
-                    }
-                    if (override === V().OVERRIDES.HIDE && flash !== V().FLASH.NONE) {
                       continue;
                     }
                     states.push(
@@ -100,10 +96,6 @@ function assertSafetyInvariants(state) {
     expect(state.flash).toBe(V().FLASH.NONE);
     expect(V().isVisible(state)).toBe(false);
   }
-  if (state.override === V().OVERRIDES.HIDE) {
-    expect(state.flash).toBe(V().FLASH.NONE);
-    expect(V().isVisible(state)).toBe(false);
-  }
   if (state.noSource || state.hostHidden) {
     expect(V().isVisible(state)).toBe(false);
   }
@@ -114,6 +106,20 @@ function assertSafetyInvariants(state) {
     state.override === V().OVERRIDES.SHOW
   ) {
     expect(V().isVisible(state)).toBe(true);
+  }
+  // Transient feedback outranks an explicit HIDE and startHidden.
+  if (state.attached && !state.noSource && !state.hostHidden && state.flash !== V().FLASH.NONE) {
+    expect(V().isVisible(state)).toBe(true);
+  }
+  // A plain HIDE with no feedback stays hidden.
+  if (
+    state.attached &&
+    !state.noSource &&
+    !state.hostHidden &&
+    state.override === V().OVERRIDES.HIDE &&
+    state.flash === V().FLASH.NONE
+  ) {
+    expect(V().isVisible(state)).toBe(false);
   }
 }
 
@@ -127,7 +133,7 @@ describe('ControllerVisibility pure policy', () => {
 
   it('implements the complete render precedence relation', () => {
     const states = allValidStates();
-    expect(states).toHaveLength(448);
+    expect(states).toHaveLength(544);
     for (const state of states) {
       assertSafetyInvariants(state);
     }
@@ -192,12 +198,16 @@ describe('ControllerVisibility pure policy', () => {
     expect(audio.flash).toBe(V().FLASH.PERSISTENT);
   });
 
-  it('blocks new flash under startHidden or explicit HIDE without retroactive cancellation', () => {
+  it('allows new flash under startHidden or explicit HIDE, never cancelling an active flash', () => {
     const startHidden = V().createState({ startHidden: true, automaticHidden: true });
-    expect(V().step(startHidden, { type: V().EVENTS.FLASH_REQUEST })).toEqual(startHidden);
+    const flashedFromStartHidden = V().step(startHidden, { type: V().EVENTS.FLASH_REQUEST });
+    expect(flashedFromStartHidden.flash).toBe(V().FLASH.TIMED_ARMED);
+    expect(V().isVisible(flashedFromStartHidden)).toBe(true);
 
     const hidden = V().createState({ override: V().OVERRIDES.HIDE });
-    expect(V().step(hidden, { type: V().EVENTS.FLASH_REQUEST })).toEqual(hidden);
+    const flashedFromHide = V().step(hidden, { type: V().EVENTS.FLASH_REQUEST });
+    expect(flashedFromHide.flash).toBe(V().FLASH.TIMED_ARMED);
+    expect(V().isVisible(flashedFromHide)).toBe(true);
 
     let active = V().createState({ flash: V().FLASH.TIMED_ARMED });
     active = V().step(active, { type: V().EVENTS.SET_START_HIDDEN, value: true });
@@ -267,6 +277,6 @@ describe('ControllerVisibility exhaustive bounded transition model', () => {
       }
     }
 
-    expect(transitions).toBe(6720);
+    expect(transitions).toBe(8160);
   });
 });

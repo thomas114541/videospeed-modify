@@ -137,10 +137,11 @@ async function assertCssVisibilityMatrix(page) {
                   hostStyle.visibility !== 'hidden' &&
                   controllerStyle.display !== 'none' &&
                   controllerStyle.visibility !== 'hidden';
-                const hardHidden = hostHidden || noSource || mode === 'hide';
+                const hardHidden = hostHidden || noSource;
                 const forcedShown = mode === 'show' || flash;
                 const expected =
-                  !hardHidden && (forcedShown || (!automaticHidden && !siteAutohide));
+                  !hardHidden &&
+                  (forcedShown || (mode !== 'hide' && !automaticHidden && !siteAutohide));
                 count += 1;
 
                 if (actual !== expected) {
@@ -377,9 +378,14 @@ async function testDisplayToggle() {
       'show alternates to persistent hide'
     );
 
-    // Explicit hide is final even if a stale flash class is present.
+    // Transient feedback outranks an explicit hide: a speed or pause shortcut
+    // must stay visible even after V hid the controller.
     await page.evaluate(() => document.querySelector('vsc-controller').classList.add('vsc-show'));
-    await waitForState(page, { mode: 'hide', visible: false }, 'hide override beats flash');
+    await waitForState(
+      page,
+      { mode: 'hide', flashing: true, visible: true },
+      'transient flash outranks explicit hide'
+    );
     await page.keyboard.press('v');
     await waitForState(
       page,

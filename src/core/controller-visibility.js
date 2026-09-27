@@ -80,16 +80,16 @@ class ControllerVisibility {
    */
   static isVisible(state) {
     this.assertState(state);
-    if (
-      !state.attached ||
-      state.hostHidden ||
-      state.noSource ||
-      state.override === this.OVERRIDES.HIDE
-    ) {
+    if (!state.attached || state.hostHidden || state.noSource) {
       return false;
     }
+    // Explicit SHOW and transient feedback outrank every hide layer, including
+    // an explicit HIDE and startHidden. Only unavailable media (above) is final.
     if (state.override === this.OVERRIDES.SHOW || state.flash !== this.FLASH.NONE) {
       return true;
+    }
+    if (state.override === this.OVERRIDES.HIDE) {
+      return false;
     }
     return !state.automaticHidden && !state.siteAutohide;
   }
@@ -117,18 +117,15 @@ class ControllerVisibility {
   }
 
   /**
-   * startHidden and explicit HIDE are the only policy-level flash blockers.
-   * Source/automatic/site hiding remains render-layer state so a flash can
-   * provide feedback without corrupting AUTO.
+   * Only detachment blocks a flash. Transient feedback (speed change, pause)
+   * must stay visible even while startHidden or an explicit HIDE keeps the
+   * controller hidden otherwise, so those are render-layer concerns now: the
+   * shadow cascade lets .vsc-show outrank both and keeps no-source final.
    * @param {Object} input
    * @returns {boolean}
    */
   static allowsFlash(input) {
-    return (
-      input?.attached !== false &&
-      !input?.startHidden &&
-      this.normalizeOverride(input?.override) !== this.OVERRIDES.HIDE
-    );
+    return input?.attached !== false;
   }
 
   /**
@@ -269,9 +266,6 @@ class ControllerVisibility {
     }
     if (state.mediaType === this.MEDIA_TYPES.VIDEO && state.flash === this.FLASH.PERSISTENT) {
       throw new TypeError('video visibility state cannot carry a persistent flash');
-    }
-    if (state.override === this.OVERRIDES.HIDE && state.flash !== this.FLASH.NONE) {
-      throw new TypeError('explicit HIDE cannot coexist with flash');
     }
   }
 }

@@ -163,6 +163,14 @@ if (!window.VSC.VideoSpeedConfig) {
         this.settings.startHidden = Boolean(storage.startHidden);
         this.settings.controllerOpacity = Number(storage.controllerOpacity);
         this.settings.controllerButtonSize = Number(storage.controllerButtonSize);
+        // Transient flash duration. Anything that is not a positive finite
+        // number falls back to the default so a corrupt value cannot turn
+        // every flash into an immediate or never-expiring hide.
+        const autoHideSeconds = Number(storage.autoHideSeconds);
+        this.settings.autoHideSeconds =
+          Number.isFinite(autoHideSeconds) && autoHideSeconds > 0
+            ? autoHideSeconds
+            : window.VSC.Constants.DEFAULT_SETTINGS.autoHideSeconds;
         // One-time migration: drop legacy controllerCSS key, reset to new model.
         if (storage.controllerCSS !== null) {
           window.VSC.StorageManager.remove(['controllerCSS']);

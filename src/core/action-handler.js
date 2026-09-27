@@ -119,6 +119,11 @@ class ActionHandler {
 
       case 'pause':
         this.pause(video);
+        // Pause gets the same transient feedback as a speed change: reveal the
+        // controller, then let it hide again after autoHideSeconds.
+        if (video.vsc?.div) {
+          this.flashController(video.vsc.div);
+        }
         break;
 
       case 'muted':
@@ -364,27 +369,28 @@ class ActionHandler {
   }
 
   /**
+   * How long a transient controller flash stays visible.
+   * @returns {number} Duration in milliseconds from the autoHideSeconds setting
+   * @private
+   */
+  defaultFlashDurationMs() {
+    return (this.config.settings.autoHideSeconds || 3) * 1000;
+  }
+
+  /**
    * Flash controller briefly for visual feedback.
    * Single entry point for all temporary visibility — replaces both
    * blinkController and EventManager.showController.
+   *
+   * Nothing at the policy layer blocks a flash except detachment: a speed or
+   * pause shortcut must be visible even when startHidden or an explicit HIDE
+   * would otherwise keep the controller hidden. Only no-source media stays
+   * unreachable, and that is enforced by the shadow CSS cascade.
+   *
    * @param {HTMLElement} controller - Controller element
-   * @param {number} duration - Duration in ms (default 2000)
+   * @param {number} [duration] - Duration in ms (defaults to autoHideSeconds)
    */
   flashController(controller, duration) {
-    const visibility = window.VSC.ControllerVisibility;
-    const override = visibility.normalizeOverride(controller.dataset.vscVisibility);
-    if (
-      !visibility.allowsFlash({
-        attached: true,
-        startHidden: this.config.settings.startHidden,
-        override,
-      })
-    ) {
-      const reason = this.config.settings.startHidden ? 'startHidden preference' : 'user hide';
-      window.VSC.logger.debug(`flashController skipped: ${reason}`);
-      return;
-    }
-
     const isAudioController = this.isAudioController(controller);
 
     // Always clear any existing timer first (timer invariant: one per controller)
@@ -393,8 +399,9 @@ class ActionHandler {
       controller.flashTimer = undefined;
     }
 
-    // Add vsc-show class to temporarily show the automatic controller state.
-    // An explicit hide override still wins via the final shadow CSS rule.
+    // Add vsc-show class to temporarily show the controller. The shadow CSS
+    // places this rule after both the automatic and the explicit-hide layers,
+    // so feedback wins over them; only no-source media stays hidden.
     controller.classList.add('vsc-show');
     window.VSC.logger.debug('Showing controller temporarily with vsc-show class');
 
@@ -404,7 +411,7 @@ class ActionHandler {
         controller.classList.remove('vsc-show');
         controller.flashTimer = undefined;
         window.VSC.logger.debug('Removing vsc-show class after flash timeout');
-      }, duration || 2000);
+      }, duration || this.defaultFlashDurationMs());
     } else {
       window.VSC.logger.debug('Audio controller flash - keeping vsc-show class');
     }

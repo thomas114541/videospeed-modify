@@ -381,7 +381,7 @@ describe('ActionHandler', () => {
 
   // --- flashController visibility rules ---
 
-  it('flashController: startHidden=true → never flashes, even after V toggle', async () => {
+  it('flashController: startHidden=true still flashes transient feedback', async () => {
     const config = window.VSC.videoSpeedConfig;
     await config.load();
     config.settings.startHidden = true;
@@ -393,12 +393,13 @@ describe('ActionHandler', () => {
 
     // Before any V toggle
     actionHandler.flashController(controller);
-    expect(controller.classList.contains('vsc-show')).toBe(false);
+    expect(controller.classList.contains('vsc-show')).toBe(true);
 
     // After user presses V (explicitly shows the controller)
     controller.dataset.vscVisibility = 'show';
+    controller.classList.remove('vsc-show');
     actionHandler.flashController(controller);
-    expect(controller.classList.contains('vsc-show')).toBe(false);
+    expect(controller.classList.contains('vsc-show')).toBe(true);
   });
 
   it('flashController: startHidden=false → flashes on speed change', async () => {
@@ -415,7 +416,7 @@ describe('ActionHandler', () => {
     expect(controller.classList.contains('vsc-show')).toBe(true);
   });
 
-  it('flashController: explicit hide override does not flash', async () => {
+  it('flashController: explicit hide override still flashes transient feedback', async () => {
     const config = window.VSC.videoSpeedConfig;
     await config.load();
     config.settings.startHidden = false;
@@ -428,7 +429,7 @@ describe('ActionHandler', () => {
     controller.dataset.vscVisibility = 'hide';
 
     actionHandler.flashController(controller);
-    expect(controller.classList.contains('vsc-show')).toBe(false);
+    expect(controller.classList.contains('vsc-show')).toBe(true);
   });
 
   it('ActionHandler should work with videos in nested shadow DOM', async () => {

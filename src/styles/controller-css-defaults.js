@@ -51,9 +51,10 @@ export const DEFAULT_CONTROLLER_CSS = `/* === Domain-based rules (stable — hos
 
 /* YouTube autohide — style the light-DOM host instead of relying on the
    deprecated Chromium-only :host-context() shadow selector. Explicit SHOW
-   and temporary feedback stop matching this rule; HIDE and no-source remain
-   final in the shadow cascade. Domain wrapping prevents unrelated sites from
-   paying for or accidentally matching the YouTube-owned ancestor class. */
+   and temporary feedback stop matching this rule; no-source stays final in
+   the shadow cascade, while HIDE is outranked by transient feedback.
+   Domain wrapping prevents unrelated sites from paying for or accidentally
+   matching the YouTube-owned ancestor class. */
 :root[style*='--vsc-domain: "youtube.com"'] .ytp-autohide vsc-controller:not([data-vsc-visibility="show"]):not(.vsc-show) {
   visibility: hidden !important;
   opacity: 0 !important;

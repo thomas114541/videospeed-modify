@@ -29,32 +29,33 @@ Explicit `SHOW` / `HIDE` intent persists for the lifetime of its controller. Per
 | Site autohide      | `siteAutohide`    | `siteAutohide[i]`    | domain-scoped host CSS observing page-owned state such as `.ytp-autohide` |
 | External host hide | `hostHidden`      | `hostHidden[i]`      | computed `display` / `visibility` on `<vsc-controller>`                   |
 | Feedback           | `flash`           | `flashMode[i]`       | `vsc-show` plus an optional `flashTimer`                                  |
-| Preference         | `startHidden`     | `startHidden`        | live settings value consulted by future automatic-show and flash events   |
+| Preference         | `startHidden`     | `startHidden`        | live settings value consulted by future automatic-show events             |
 | Media kind         | `mediaType`       | `AudioControllers`   | media tag name                                                            |
 
-`startHidden` initializes the automatic layer but is not itself a permanent hard-hide bit. A live change to `startHidden` is non-retroactive: it does not immediately rewrite an existing controller or cancel an active flash. It blocks future automatic-show and flash requests until disabled.
+`startHidden` initializes the automatic layer but is not itself a permanent hard-hide bit. A live change to `startHidden` is non-retroactive: it does not immediately rewrite an existing controller or cancel an active flash. It blocks future automatic-show requests until disabled, but it never blocks transient feedback.
 
 ## Render precedence
 
 For a controller `i`:
 
 ```text
-hardHidden = !attached || hostHidden || noSource || override == HIDE
+hardHidden = !attached || hostHidden || noSource
 forcedShown = override == SHOW || flash != NONE
-visible = !hardHidden && (forcedShown || (!automaticHidden && !siteAutohide))
+visible = !hardHidden && (forcedShown || (override != HIDE && !automaticHidden && !siteAutohide))
 ```
 
 Equivalent precedence, highest first:
 
 ```text
-external host hide / no source / FORCE_HIDE
+external host hide / no source
   > FORCE_SHOW / flash
+  > FORCE_HIDE
   > automatic hide / site autohide
 ```
 
-`SHOW` deliberately overrides `vsc-hidden` and site autohide, but it cannot resurrect a detached controller, make unusable media useful, or defeat unrelated page CSS that hides the light-DOM host. `HIDE` defeats a stale flash class. Opacity is excluded from the discrete visibility predicate because fades pass through zero; computed `display` and `visibility` on both host and shadow controller define the sampled state.
+`SHOW` deliberately overrides `vsc-hidden`, site autohide, and an explicit `HIDE`, but it cannot resurrect a detached controller, make unusable media useful, or defeat unrelated page CSS that hides the light-DOM host. Transient feedback likewise defeats a stale `HIDE`: the `.vsc-show` rule is ordered after the explicit-hide rule, so a speed or pause shortcut is always visible. Only unavailable media stays final. Opacity is excluded from the discrete visibility predicate because fades pass through zero; computed `display` and `visibility` on both host and shadow controller define the sampled state.
 
-YouTube site autohide is implemented by domain-scoped light-DOM CSS on `<vsc-controller>`, not by copying page state into extension-owned DOM and not by the deprecated `:host-context()` selector. The host rule excludes explicit `SHOW` and `vsc-show` feedback before applying `visibility: hidden`; shadow selectors keep automatic hide, explicit `HIDE`, and no-source precedence. Changing either side requires the Chrome matrix test, not just a unit test.
+YouTube site autohide is implemented by domain-scoped light-DOM CSS on `<vsc-controller>`, not by copying page state into extension-owned DOM and not by the deprecated `:host-context()` selector. The host rule excludes explicit `SHOW` and `vsc-show` feedback before applying `visibility: hidden`; shadow selectors order the automatic layer, explicit `HIDE`, and transient feedback, then apply no-source last so it stays final. Changing either side requires the Chrome matrix test, not just a unit test.
 
 ## User toggle transition
 
@@ -78,7 +79,7 @@ Keyboard and popup display actions broadcast to every attached controller. Each 
 - Source, site-autohide, and external-host changes affect only their own rendering layer.
 - A permitted video feedback request enters `TIMED_ARMED`; timer progress enters `TIMED_DUE`; expiry returns to `NONE`. A repeated request re-arms the timer.
 - A permitted audio feedback request enters `PERSISTENT`. It has no timer and lasts until a display toggle or release.
-- `startHidden` and explicit `HIDE` block new feedback requests. Existing feedback survives a later live `startHidden=true` setting change and still expires normally.
+- `startHidden` and explicit `HIDE` never block new feedback requests; transient feedback must stay visible even when those layers would otherwise hide the controller. Existing feedback survives a later live `startHidden=true` setting change and still expires normally.
 - Release clears override and feedback atomically for the abstract controller, cancels the production timer, removes StateManager membership, detaches `video.vsc`, and removes the host. Release is terminal for that controller identity; later control of the same media is a fresh controller initialized from current inputs.
 
 ## Formal model
@@ -88,7 +89,7 @@ Keyboard and popup display actions broadcast to every attached controller. Each 
 TLC checks:
 
 - type and media-specific flash invariants;
-- explicit `HIDE` / flash exclusion;
+- explicit `HIDE` hiding the controller only while no feedback is active;
 - detached-controller inertness;
 - targeted-action locality and broadcast independence;
 - the render-aware first toggle and subsequent explicit `SHOW` / `HIDE` alternation;
@@ -105,8 +106,8 @@ The bounded timer models ordering and eventual progress, not wall-clock millisec
 
 The verification layers answer different questions:
 
-1. `npm run test:tlc` exhaustively checks the two-controller temporal model. The current configuration reaches 49,152 distinct states, generates 724,800 states, and checks three non-vacuous video-timer liveness branches.
-2. `tests/unit/core/controller-visibility.test.js` enumerates 448 valid local states and 6,720 state/event pairs against the pure JavaScript transition policy.
+1. `npm run test:tlc` exhaustively checks the two-controller temporal model. The current configuration reaches 71,680 distinct states, generates 1,091,136 states, and checks three non-vacuous video-timer liveness branches.
+2. `tests/unit/core/controller-visibility.test.js` enumerates 544 valid local states and 8,160 state/event pairs against the pure JavaScript transition policy.
 3. `tests/integration/controller-visibility-differential.test.js` replays deterministic mixed traces through the pure model and real `ActionHandler` / `VideoController` adapters, including local and broadcast actions, video and audio feedback, environment changes, live settings, expiry, and release.
 4. `tests/e2e/display-toggle.e2e.js` checks the real document-and-shadow cascade across `3 overrides × 2 automaticHidden × 2 siteAutohide × 2 flash × 2 noSource × 2 hostHidden = 96` render combinations, then verifies mixed two-controller local, broadcast, flash-sampling, and release behavior in Chrome.
 
